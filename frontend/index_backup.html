@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetricMind Dashboard</title>
+ <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f4f6f8;
+        color: #222;
+    }
+
+    .dashboard {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    h2 {
+        margin-top: 30px;
+    }
+
+    .metrics-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .metric-card {
+        background: white;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .metric-card h3,
+    .profit-margin h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        color: #666;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .metric-card p,
+    .profit-margin p {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .profit-margin {
+        margin-top: 16px;
+        background: white;
+        padding: 18px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (max-width: 900px) {
+        .metrics-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .metrics-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    .table-container {
+    margin-top: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #f4f6f8;
+    font-weight: bold;
+}
+
+.chart-container {
+    margin-top: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-height: 320px;
+}
+
+.chart-container canvas {
+    max-height: 260px;
+}
+
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+.dashboard-header {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-header h1 {
+    text-align: left;
+    margin: 0;
+    font-size: 30px;
+}
+
+.dashboard-header p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<div class="dashboard-header">
+   <div>
+       <h1>MetricMind</h1>
+       <p>Business Analytics Dashboard</p>
+   </div>
+</div>
+
+   <h2>Overall Metrics</h2>
+
+<div class="metrics-container">
+
+    <div class="metric-card">
+        <h3>Total Orders</h3>
+        <p id="total-orders">Loading...</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Total Revenue</h3>
+        <p id="total-revenue">Loading...</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Total Cost</h3>
+        <p id="total-cost">Loading...</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Total Profit</h3>
+        <p id="total-profit">Loading...</p>
+    </div>
+
+</div>
+
+<div class="profit-margin">
+    <h3>Profit Margin</h3>
+    <p id="profit-margin">Loading...</p>
+</div>
+
+<h2>Regional Performance</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Region</th>
+                <th>Orders</th>
+                <th>Revenue</th>
+                <th>Cost</th>
+                <th>Profit</th>
+            </tr>
+        </thead>
+
+        <tbody id="regional-table">
+            <tr>
+                <td colspan="5">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="charts-row">
+
+    <div class="chart-container">
+        <h2>Revenue by Region</h2>
+        <canvas id="regionalChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>Profit by Product</h2>
+        <canvas id="productChart"></canvas>
+    </div>
+
+</div>
+
+<h2>Monthly Performance</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Orders</th>
+                <th>Revenue</th>
+                <th>Cost</th>
+                <th>Profit</th>
+            </tr>
+        </thead>
+
+        <tbody id="monthly-table">
+            <tr>
+                <td colspan="5">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="chart-container">
+
+    <h2>Monthly Revenue & Profit</h2>
+
+    <canvas id="monthlyChart" style="height: 350px;"></canvas>
+
+</div>
+
+<h2>Country Performance</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Country</th>
+                <th>Orders</th>
+                <th>Revenue</th>
+                <th>Cost</th>
+                <th>Profit</th>
+            </tr>
+        </thead>
+
+        <tbody id="country-table">
+            <tr>
+                <td colspan="5">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="chart-container">
+    <h2>Revenue by Country</h2>
+    <canvas id="countryChart"></canvas>
+</div>
+
+<script>
+    async function loadDashboard() {
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:5000/api/dashboard"
+            );
+
+            const data = await response.json();
+
+            const overall = data.overall;
+
+            const regions = data.regions;
+
+const regionalTable = document.getElementById("regional-table");
+
+regionalTable.innerHTML = "";
+
+for (const region of regions) {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>${region[0]}</td>
+        <td>${region[1]}</td>
+        <td>${region[2]}</td>
+        <td>${region[3]}</td>
+        <td>${region[4]}</td>
+    `;
+
+    regionalTable.appendChild(row);
+}
+
+const regionLabels = regions.map(region => region[0]);
+const regionRevenue = regions.map(region => region[2]);
+
+const regionalCtx = document.getElementById("regionalChart");
+
+new Chart(regionalCtx, {
+    type: "bar",
+
+    data: {
+        labels: regionLabels,
+
+        datasets: [
+            {
+                label: "Revenue",
+                data: regionRevenue,
+                borderWidth: 1
+            }
+        ]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+
+const products = data.products;
+
+const productTable = document.getElementById("product-table");
+
+if (productTable) {
+    productTable.innerHTML = "";
+
+    for (const product of products) {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${product[0]}</td>
+            <td>${product[1]}</td>
+            <td>${product[2]}</td>
+            <td>${product[3]}</td>
+            <td>${product[4]}</td>
+        `;
+
+        productTable.appendChild(row);
+    }
+}
+
+const productLabels = products.map(product => product[0]);
+const productProfit = products.map(product => product[4]);
+
+const productCtx = document.getElementById("productChart");
+
+new Chart(productCtx, {
+    type: "bar",
+
+    data: {
+        labels: productLabels,
+
+        datasets: [
+            {
+                label: "Profit",
+                data: productProfit,
+                borderWidth: 1
+            }
+        ]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+
+const months = data.months;
+
+const monthlyTable = document.getElementById("monthly-table");
+
+monthlyTable.innerHTML = "";
+
+for (const month of months) {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>${month[0]}</td>
+        <td>${month[1]}</td>
+        <td>${month[2]}</td>
+        <td>${month[3]}</td>
+        <td>${month[4]}</td>
+    `;
+
+    monthlyTable.appendChild(row);
+}
+
+const chartLabels = months.map(month => {
+    const date = new Date(month[0]);
+    return date.toLocaleString("en-US", {
+        month: "short"
+    });
+});
+
+const revenueData = months.map(month => Number(month[2]));
+const profitData = months.map(month => Number(month[4]));
+
+const ctx = document.getElementById("monthlyChart");
+
+new Chart(ctx, {
+    type: "line",
+
+    data: {
+        labels: chartLabels,
+
+        datasets: [
+            {
+                label: "Revenue",
+                data: revenueData,
+                borderWidth: 2
+            },
+            {
+                label: "Profit",
+                data: profitData,
+                borderWidth: 2
+            }
+        ]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+            const countries = data.countries;
+            const countryTable = document.getElementById("country-table");
+            countryTable.innerHTML = "";
+
+            for (const country of countries) {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${country[0]}</td>
+                    <td>${country[1]}</td>
+                    <td>${country[2]}</td>
+                    <td>${country[3]}</td>
+                    <td>${country[4]}</td>
+                `;
+                countryTable.appendChild(row);
+            }
+
+            const countryLabels = countries.map(country => country[0]);
+            const countryRevenue = countries.map(country => country[2]);
+
+            const countryCtx = document.getElementById("countryChart");
+
+            new Chart(countryCtx, {
+                type: "bar",
+                data: {
+                    labels: countryLabels,
+                    datasets: [
+                        {
+                            label: "Revenue",
+                            data: countryRevenue,
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+
+            document.getElementById("total-orders").textContent = overall[0];
+            document.getElementById("total-revenue").textContent = overall[1];
+            document.getElementById("total-cost").textContent = overall[2];
+            document.getElementById("total-profit").textContent = overall[3];
+            document.getElementById("profit-margin").textContent =
+                overall[4] + "%";
+
+        } catch (error) {
+            console.error("Error loading dashboard:", error);
+        }
+    }
+
+    loadDashboard();
+</script>
+
+</div>
+
+</body>
+
+</html>

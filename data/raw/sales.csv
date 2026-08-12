@@ -1,0 +1,13 @@
+order_id,order_date,region,country,product,revenue,cost
+1001,2026-01-15,Europe,Germany,Laptop,12000,8000
+1002,2026-01-20,Europe,France,Monitor,7000,4500
+1003,2026-02-05,North America,USA,Laptop,15000,9500
+1004,2026-02-18,Asia,India,Keyboard,3000,1800
+1005,2026-03-10,Europe,Germany,Monitor,9000,6000
+1006,2026-03-22,Asia,India,Laptop,11000,7200
+1007,2026-04-08,Europe,France,Keyboard,4000,2300
+1008,2026-04-19,North America,USA,Monitor,8500,5200
+1009,2026-05-12,Asia,India,Laptop,13000,8500
+1010,2026-05-25,Europe,Germany,Keyboard,3500,2000
+1011,2026-06-07,North America,USA,Laptop,16000,10000
+1012,2026-06-21,Europe,France,Monitor,7500,4700

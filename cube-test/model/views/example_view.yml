@@ -1,0 +1,15 @@
+views:
+  - name: sales_dashboard
+
+    cubes:
+      - join_path: Orders
+        includes:
+          - order_id
+          - order_date
+          - region
+          - country
+          - product
+          - total_orders
+          - total_revenue
+          - total_cost
+          - total_profit

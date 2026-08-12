@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MetricMind | Business Analytics</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        /* =========================
+           LAYOUT
+        ========================= */
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 240px;
+            background: #111827;
+            color: white;
+            padding: 24px 16px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .brand {
+            padding: 0 12px 30px;
+        }
+
+        .brand h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .brand span {
+            color: #60a5fa;
+        }
+
+        .brand p {
+            margin: 6px 0 0;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .nav-title {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 12px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: block;
+            text-decoration: none;
+            color: #cbd5e1;
+            padding: 12px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .sidebar a.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* =========================
+           MAIN CONTENT
+        ========================= */
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 28px 32px;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .page-title h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .page-title p {
+            margin: 6px 0 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: white;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #4b5563;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .refresh-btn {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* =========================
+           SECTION
+        ========================= */
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .section-header span {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        /* =========================
+           KPI CARDS
+        ========================= */
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            border: 1px solid #edf0f5;
+            transition: 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .metric-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-title {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .metric-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .blue {
+            background: #eff6ff;
+        }
+
+        .green {
+            background: #ecfdf5;
+        }
+
+        .orange {
+            background: #fff7ed;
+        }
+
+        .purple {
+            background: #f5f3ff;
+        }
+
+        .metric-value {
+            margin-top: 14px;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .metric-subtitle {
+            margin-top: 6px;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .metric-trend {
+            margin-left: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .metric-trend.positive {
+            color: #16a34a;
+        }
+
+        .metric-trend.neutral {
+            color: #6b7280;
+        }
+
+        /* =========================
+           CHART GRID
+        ========================= */
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            border: 1px solid #edf0f5;
+        }
+
+        .chart-card h3 {
+            margin: 0 0 18px;
+            font-size: 16px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            border: 1px solid #edf0f5;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 13px;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        td {
+            padding: 14px 13px;
+            border-bottom: 1px solid #eef2f7;
+            font-size: 13px;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .profit {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 12px;
+            padding: 30px 0 10px;
+        }
+
+        /* =========================
+           LOADING
+        ========================= */
+
+        .loading {
+            text-align: center;
+            color: #9ca3af;
+            padding: 25px;
+        }
+
+        /* =========================
+           ERROR
+        ========================= */
+
+        .error-box {
+            display: none;
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1100px) {
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                width: 190px;
+            }
+
+            .main {
+                margin-left: 190px;
+                width: calc(100% - 190px);
+                padding: 20px;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .app {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 16px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <h2>Metric<span>Mind</span></h2>
+
+            <p>Business Intelligence</p>
+
+        </div>
+
+        <div class="nav-title">
+            Overview
+        </div>
+
+        <a href="#dashboard" class="active">
+            Dashboard
+        </a>
+
+        <a href="#metrics">
+            Metrics
+        </a>
+
+        <a href="#analytics">
+            Analytics
+        </a>
+
+        <div class="nav-title" style="margin-top:25px;">
+            Reports
+        </div>
+
+        <a href="#regional">
+            Regional
+        </a>
+
+        <a href="#products">
+            Products
+        </a>
+
+        <a href="#monthly">
+            Monthly
+        </a>
+
+        <a href="#countries">
+            Countries
+        </a>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="main" id="dashboard">
+
+
+        <!-- HEADER -->
+
+        <div class="topbar">
+
+            <div class="page-title">
+
+                <h1>Dashboard</h1>
+
+                <p>
+                    Business performance overview
+                </p>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <div class="status">
+
+                    <span class="status-dot"></span>
+
+                    Live Data
+
+                </div>
+
+                <button
+                    class="refresh-btn"
+                    onclick="loadDashboard()"
+                >
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ERROR MESSAGE -->
+
+        <div
+            id="error-box"
+            class="error-box"
+        >
+            Unable to load dashboard data.
+            Please make sure the backend server is running.
+        </div>
+
+
+        <!-- =========================
+             KPI SECTION
+        ========================== -->
+
+        <section
+            class="section"
+            id="metrics"
+        >
+
+            <div class="section-header">
+
+                <h2>Key Performance Indicators</h2>
+
+                <span>
+                    Overall business performance
+                </span>
+
+            </div>
+
+
+            <div class="metrics-grid">
+
+
+                <!-- ORDERS -->
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-title">
+                            Total Orders
+                        </span>
+
+                        <div class="metric-icon blue">
+                            🛒
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="total-orders"
+                    >
+                        Loading...
+                    </div>
+
+                   <div class="metric-subtitle">
+                       Total orders processed
+                       <span class="metric-trend positive">● Live</span>
+                   </div>
+
+                </div>
+
+
+                <!-- REVENUE -->
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-title">
+                            Total Revenue
+                        </span>
+
+                        <div class="metric-icon green">
+                            ₹
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="total-revenue"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="metric-subtitle">
+                        Total sales revenue
+                        <span class="metric-trend positive">● Live</span>
+                    </div>
+
+                </div>
+
+
+                <!-- COST -->
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-title">
+                            Total Cost
+                        </span>
+
+                        <div class="metric-icon orange">
+                            ₹
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="total-cost"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="metric-subtitle">
+                        Total business cost
+                        <span class="metric-trend negative">● Live</span>
+                    </div>
+
+                </div>
+
+
+                <!-- PROFIT -->
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-title">
+                            Total Profit
+                        </span>
+
+                        <div class="metric-icon purple">
+                            📈
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="total-profit"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="metric-subtitle">
+                        Revenue minus cost
+                        <span class="metric-trend positive">● Live</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             PROFIT MARGIN
+        ========================== -->
+
+        <section class="section">
+
+            <div class="metric-card">
+
+                <div class="metric-top">
+
+                    <span class="metric-title">
+                        Profit Margin
+                    </span>
+
+                    <div class="metric-icon green">
+                        %
+                    </div>
+
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="profit-margin"
+                >
+                    Loading...
+                </div>
+
+                <div class="metric-subtitle">
+                    Overall profitability
+                    <span class="metric-trend positive">● Live</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CHARTS
+        ========================== -->
+
+        <section
+            class="section"
+            id="analytics"
+        >
+
+            <div class="section-header">
+
+                <h2>Analytics</h2>
+
+                <span>
+                    Visual performance analysis
+                </span>
+
+            </div>
+
+
+            <div class="charts-grid">
+
+
+                <!-- REGION REVENUE -->
+
+                <div class="chart-card">
+
+                    <h3>
+                        Revenue by Region
+                    </h3>
+
+                    <div class="chart-wrapper">
+
+                        <canvas id="regionalChart"></canvas>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PRODUCT PROFIT -->
+
+                <div class="chart-card">
+
+                    <h3>
+                        Profit by Product
+                    </h3>
+
+                    <div class="chart-wrapper">
+
+                        <canvas id="productChart"></canvas>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MONTHLY -->
+
+                <div class="chart-card">
+
+                    <h3>
+                        Monthly Revenue & Profit
+                    </h3>
+
+                    <div class="chart-wrapper">
+
+                        <canvas id="monthlyChart"></canvas>
+
+                    </div>
+
+                </div>
+
+
+                <!-- COUNTRY -->
+
+                <div class="chart-card">
+
+                    <h3>
+                        Revenue by Country
+                    </h3>
+
+                    <div class="chart-wrapper">
+
+                        <canvas id="countryChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             REGIONAL TABLE
+        ========================== -->
+
+        <section
+            class="section"
+            id="regional"
+        >
+
+            <div class="section-header">
+
+                <h2>Regional Performance</h2>
+
+                <span>
+                    Revenue and profitability by region
+                </span>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Region</th>
+                            <th>Orders</th>
+                            <th>Revenue</th>
+                            <th>Cost</th>
+                            <th>Profit</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="regional-table">
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="loading"
+                            >
+                                Loading...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             PRODUCT TABLE
+        ========================== -->
+
+        <section
+            class="section"
+            id="products"
+        >
+
+            <div class="section-header">
+
+                <h2>Product Performance</h2>
+
+                <span>
+                    Product-level business performance
+                </span>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Product</th>
+                            <th>Orders</th>
+                            <th>Revenue</th>
+                            <th>Cost</th>
+                            <th>Profit</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="product-table">
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="loading"
+                            >
+                                Loading...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+         <!-- =========================
+             MONTHLY TABLE
+        ========================== -->
+
+        <section
+            class="section"
+            id="monthly"
+        >
+
+            <div class="section-header">
+
+                <h2>Monthly Performance</h2>
+
+                <span>
+                    Monthly sales and profit trends
+                </span>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Month</th>
+                            <th>Orders</th>
+                            <th>Revenue</th>
+                            <th>Cost</th>
+                            <th>Profit</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="monthly-table">
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="loading"
+                            >
+                                Loading...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             COUNTRY TABLE
+        ========================== -->
+
+        <section
+            class="section"
+            id="country"
+        >
+
+            <div class="section-header">
+
+                <h2>Country Performance</h2>
+
+                <span>
+                    Geographic revenue analysis
+                </span>
+
+            </div>
+
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Country</th>
+                            <th>Orders</th>
+                            <th>Revenue</th>
+                            <th>Cost</th>
+                            <th>Profit</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="country-table">
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="loading"
+                            >
+                                Loading...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- FOOTER -->
+         <div class="footer">
+            
+            MetricMind Business Intelligence Dashboard
+            <br>
+            Powered by Flask and Snowflake
+
+        </div>
+
+    </main>
+
+</div>  
+
+
+<!-- =========================
+     JAVASCRIPT
+========================= -->
+
+<script>
+    let regionalChart;
+    let productChart;
+    let monthlyChart;
+    let countryChart;
+
+    /*=========================
+     FORMAT NUMBERS
+    =========================*/
+
+    function formatNumber(value) {
+        
+        if (value === null || value === undefined) {
+            return "0";
+        }
+
+        const number = Number(value);
+
+        return number.toLocaleString("en-IN", {
+            maximumFractionDigits: 2
+        });
+
+    }
+
+    /*=========================
+     FORMAT MONEY
+    =========================*/
+
+    function formatMoney(value) {
+        
+        if (value === null || value === undefined) {
+            return "₹0";
+        }
+
+        const number = Number(value);
+
+        return "₹" + number.toLocaleString("en-IN", {
+            maximumFractionDigits: 2
+        });
+
+    }
+
+    /*=========================
+     LOAD DASHBOARD
+    =========================*/
+
+    async function loadDashboard() {
+
+        const errorBox =
+            document.getElementById("error-box");
+
+        errorBox.style.display = "none";
+
+        try {
+            const response = await fetch("http://localhost:5000/api/dashboard"
+            );
+
+            if (!response.ok) {
+                
+                throw new Error("API request failed"
+                );
+                
+            }
+
+            const data = await response.json();
+
+            /*=========================
+             OVERALL METRICS
+            =========================*/
+
+            const overall = data.overall;
+            console.log("Overall DATA:", overall);
+            console.log("FULL DASHBOARD DATA:", data);
+
+            document.getElementById("total-orders").textContent = formatNumber(overall[0]);
+            document.getElementById("total-revenue").textContent = formatMoney(overall[1]);
+            document.getElementById("total-cost").textContent = formatMoney(overall[2]);
+            document.getElementById("total-profit").textContent = formatMoney(overall[3]);
+            document.getElementById("profit-margin").textContent = formatNumber(overall[4]) + "%";
+
+            /*=========================
+             REGIONS
+            =========================*/
+
+            const regions = data.regions;
+
+            const regionalTable = document.getElementById("regional-table");
+
+            regionalTable.innerHTML = "";
+
+            regions.forEach(region => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td><strong>${region[0]}</strong></td>
+                    <td>${formatNumber(region[1])}</td>
+                    <td>${formatMoney(region[2])}</td>
+                    <td>${formatMoney(region[3])}</td>
+                    <td>${formatMoney(region[4])}</td>
+                `;
+
+                regionalTable.appendChild(row);
+
+            });
+
+            /*=========================
+             REGION CHART
+            =========================*/
+
+            const regionLabels = regions.map(r => r[0]);
+            const regionRevenue = regions.map(r => r[2]);
+
+            if (regionalChart) {
+                regionalChart.destroy();
+            }
+
+            regionalChart = new Chart(document.getElementById("regionalChart"), {
+                type: "bar",
+                data: {
+                    labels: regionLabels,
+                    datasets: [{
+                        label: "Revenue",
+                        data: regionRevenue,
+                        borderRadius: 6,
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => "₹" + Number(value).toLocaleString("en-IN")
+                            }
+                        }
+                    }
+                }
+            });
+
+            /*=========================
+             PRODUCTS
+            =========================*/
+
+            const products = data.products;
+
+            const productTable = document.getElementById("product-table");
+
+            productTable.innerHTML = "";
+
+            products.forEach(product => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td><strong>${product[0]}</strong></td>
+                    <td>${formatNumber(product[1])}</td>
+                    <td>${formatMoney(product[2])}</td>
+                    <td>${formatMoney(product[3])}</td>
+                    <td>${formatMoney(product[4])}</td>
+                `;
+
+                productTable.appendChild(row);
+
+            });
+
+            /*=========================
+             PRODUCT CHART
+            =========================*/
+
+            const productLabels = products.map(p => p[0]);
+            const productRevenue = products.map(p => p[4]);
+
+            if (productChart) {
+                productChart.destroy();
+            }
+
+            productChart = new Chart(document.getElementById("productChart"), {
+                type: "bar",
+                data: {
+                    labels: productLabels,
+                    datasets: [{
+                        label: "Profit",
+                        data: productRevenue,
+                        borderRadius: 6,
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => "₹" + Number(value).toLocaleString("en-IN")
+                            }
+                        }
+                    }
+                }
+            });
+
+            /*=========================
+             MONTHS
+            =========================*/
+
+            const months = data.months;
+            const monthlyTable = document.getElementById("monthly-table");
+            monthlyTable.innerHTML = "";
+
+            months.forEach(month => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td><strong>${month[0]}</strong></td>
+                    <td>${formatNumber(month[1])}</td>
+                    <td>${formatMoney(month[2])}</td>
+                    <td>${formatMoney(month[3])}</td>
+                    <td>${formatMoney(month[4])}</td>
+                `;
+
+                monthlyTable.appendChild(row);
+
+            });
+
+            /*=========================
+             MONTHLY CHART
+            =========================*/
+
+            const chartLabels = months.map(month => {
+                const date = new Date(month[0] + "-01");
+                return date.toLocaleString("en-Us", { month: "short" });
+            });
+
+            const revenueData = months.map(month => Number(month[2]));
+            const profitData = months.map(month => Number(month[4]));
+
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+
+            monthlyChart = new Chart(document.getElementById("monthlyChart"), {
+                type: "line",
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        {
+                            label: "Revenue",
+                            data: revenueData,
+                            tension: 0.35,
+                            borderWidth: 3,
+                            fill: false
+                        },
+                        {
+                            label: "Profit",
+                            data: profitData,                            
+                            tension: 0.35,
+                            borderWidth: 3,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "top"
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => "₹" + Number(value).toLocaleString("en-IN")
+                            }
+                        }
+                    }
+                }
+            });
+
+            /*=========================
+             COUNTRIES
+            =========================*/
+
+            const countries = data.countries;
+
+            const countryTable = document.getElementById("country-table");
+
+            countryTable.innerHTML = "";
+
+            countries.forEach(country => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td><strong>${country[0]}</strong></td>
+                    <td>${formatNumber(country[1])}</td>
+                    <td>${formatMoney(country[2])}</td>
+                    <td>${formatMoney(country[3])}</td>
+                    <td>${formatMoney(country[4])}</td>
+                `;
+
+                countryTable.appendChild(row);
+
+            });
+
+            /*=========================
+             COUNTRY CHART
+            =========================*/
+
+            const countryLabels = countries.map(c => c[0]);
+            const countryRevenue = countries.map(c => c[2]);
+
+            if (countryChart) {
+                countryChart.destroy();
+            }
+
+            countryChart = new Chart(document.getElementById("countryChart"), {
+                type: "bar",
+                data: {
+                    labels: countryLabels,
+                    datasets: [{
+                        label: "Revenue",
+                        data: countryRevenue,
+                        borderRadius: 6,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => "₹" + Number(value).toLocaleString("en-IN")
+                            }
+                        }
+                    }
+                }
+            });
+
+        } catch (error) {
+            errorBox.textContent = error.message || "Failed to load dashboard.";
+            errorBox.style.display = "block";
+        }
+    }
+
+    /*=========================
+     INITIAL LOAD
+    =========================*/
+
+    loadDashboard();
+</script>
+</body>
+</html>

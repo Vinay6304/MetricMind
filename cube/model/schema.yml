@@ -1,0 +1,43 @@
+cubes:
+  - name: Sales
+
+    sql_table: SALES
+
+    dimensions:
+      - name: order_id
+        sql: ORDER_ID
+        type: string
+        primary_key: true
+
+      - name: order_date
+        sql: ORDER_DATE
+        type: time
+
+      - name: region
+        sql: REGION
+        type: string
+
+      - name: country
+        sql: COUNTRY
+        type: string
+
+      - name: product
+        sql: PRODUCT
+        type: string
+
+    measures:
+      - name: total_orders
+        sql: ORDER_ID
+        type: count
+
+      - name: total_revenue
+        sql: REVENUE
+        type: sum
+
+      - name: total_cost
+        sql: COST
+        type: sum
+
+      - name: total_profit
+        sql: REVENUE - COST
+        type: sum
