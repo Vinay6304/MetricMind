@@ -541,8 +541,7 @@
                 <div class="status">
 
                     <span class="status-dot"></span>
-
-                    Live Data
+                    <span id="connection-status">Live Data</span>
 
                 </div>
 
@@ -1176,6 +1175,12 @@
             }
 
             const data = await response.json();
+            const statusText = document.getElementById("connection-status");
+
+            if (statusText) {
+                const now = new Date();
+                statusText.textContent = "Live . updated " + now.toLocaleTimeString("en-IN",{hour: '2-digit', minute: '2-digit'});
+            }
 
             /*=========================
              OVERALL METRICS

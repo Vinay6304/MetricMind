@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, request 
 from flask_cors import CORS
 
 from scripts.analytics import get_dashboard_data
@@ -11,7 +11,9 @@ CORS(app)
 
 @app.route("/api/dashboard")
 def dashboard():
-    data = get_dashboard_data()
+    region = request.args.get("region")
+    
+    data = get_dashboard_data(region=region)
     return jsonify(data)
 
 

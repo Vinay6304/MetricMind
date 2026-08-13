@@ -100,21 +100,30 @@ def get_overall_metrics(cursor):
 # REGION METRICS
 # =========================================================
 
-def get_region_metrics(cursor):
+def get_region_metrics(cursor, region=None):
 
-    query = """
-        SELECT
-            REGION,
-            COUNT(*) AS TOTAL_ORDERS,
-            SUM(REVENUE) AS TOTAL_REVENUE,
-            SUM(COST) AS TOTAL_COST,
-            SUM(REVENUE - COST) AS TOTAL_PROFIT
-        FROM SALES
-        GROUP BY REGION
-        ORDER BY TOTAL_REVENUE DESC;
-    """
+    if region:
+        query = """
+            SELECT
+                REGION,
+                COUNT(*) AS TOTAL_ORDERS,
+                SUM(REVENUE) AS TOTAL_REVENUE,
+                SUM(COST) AS TOTAL_COST,
+                SUM(REVENUE - COST) AS TOTAL_PROFIT
+            FROM SALES
+        """
 
-    cursor.execute(query)
+        params = {}
+
+        if region:
+            query += """ WHERE REGION = %(region)s"""
+            params["region"] = region
+        query += """
+            GROUP BY REGION
+            ORDER BY TOTAL_REVENUE DESC
+        """
+
+    cursor.execute(query, params)
 
     return cursor.fetchall()
 
@@ -192,7 +201,7 @@ def get_country_metrics(cursor):
 # DASHBOARD DATA
 # =========================================================
 
-def get_dashboard_data():
+def get_dashboard_data(region=None):
 
     total_start = time.perf_counter()
 
@@ -224,7 +233,7 @@ def get_dashboard_data():
 
         start = time.perf_counter()
 
-        regions = get_region_metrics(cursor)
+        regions = get_region_metrics(cursor,region)
 
         print(
             f"Regions: "

@@ -1,0 +1,40 @@
+cubes:
+  - name: sales
+    sql_table: "\"ANALYTICS\".\"SALES\""
+    data_source: default
+
+    joins: []
+
+    dimensions:
+      - name: country
+        sql: "{CUBE}.\"COUNTRY\""
+        type: string
+
+      - name: order_id
+        sql: "{CUBE}.\"ORDER_ID\""
+        type: string
+
+      - name: product
+        sql: "{CUBE}.\"PRODUCT\""
+        type: string
+
+      - name: region
+        sql: "{CUBE}.\"REGION\""
+        type: string
+
+      - name: order_date
+        sql: "{CUBE}.\"ORDER_DATE\""
+        type: time
+
+    measures:
+      - name: count
+        type: count
+
+      - name: cost
+        sql: "{CUBE}.\"COST\""
+        type: sum
+
+    pre_aggregations:
+      # Pre-aggregation definitions go here.
+      # Learn more in the documentation: https://cube.dev/docs/caching/pre-aggregations/getting-started
+
