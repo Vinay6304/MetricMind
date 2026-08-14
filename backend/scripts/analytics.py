@@ -102,26 +102,26 @@ def get_overall_metrics(cursor):
 
 def get_region_metrics(cursor, region=None):
 
+    query = """
+        SELECT
+            REGION,
+            COUNT(*) AS TOTAL_ORDERS,
+            SUM(REVENUE) AS TOTAL_REVENUE,
+            SUM(COST) AS TOTAL_COST,
+            SUM(REVENUE - COST) AS TOTAL_PROFIT
+        FROM SALES
+    """
+
+    params = ()
+
     if region:
-        query = """
-            SELECT
-                REGION,
-                COUNT(*) AS TOTAL_ORDERS,
-                SUM(REVENUE) AS TOTAL_REVENUE,
-                SUM(COST) AS TOTAL_COST,
-                SUM(REVENUE - COST) AS TOTAL_PROFIT
-            FROM SALES
-        """
+        query += """ WHERE REGION = %s """
+        params = (region,)
 
-        params = {}
-
-        if region:
-            query += """ WHERE REGION = %(region)s"""
-            params["region"] = region
-        query += """
-            GROUP BY REGION
-            ORDER BY TOTAL_REVENUE DESC
-        """
+    query += """
+        GROUP BY REGION
+        ORDER BY TOTAL_REVENUE DESC;
+    """
 
     cursor.execute(query, params)
 

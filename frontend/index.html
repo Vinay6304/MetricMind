@@ -541,6 +541,12 @@
                 <div class="status">
 
                     <span class="status-dot"></span>
+                    <select id="region-filter">
+                        <option value="">All Regions</option>
+                        <option value="Asia">Asia</option>
+                        <option value="Europe">Europe</option>
+                        <option value="North America">North America</option>
+                    </select>
                     <span id="connection-status">Live Data</span>
 
                 </div>
@@ -1164,14 +1170,24 @@
         errorBox.style.display = "none";
 
         try {
-            const response = await fetch("http://localhost:5000/api/dashboard"
-            );
+           const regionFilter = document.getElementById("region-filter");
+const selectedRegion = regionFilter ? regionFilter.value : "";
+
+const apiUrl = selectedRegion
+    ? `http://localhost:5000/api/dashboard?region=${encodeURIComponent(selectedRegion)}`
+    : "http://localhost:5000/api/dashboard";
+
+const response = await fetch(apiUrl);
 
             if (!response.ok) {
                 
                 throw new Error("API request failed"
                 );
                 
+            }
+
+            if (regionFilter) {
+                regionFilter.addEventListener("change", loadDashboard);
             }
 
             const data = await response.json();
