@@ -30,8 +30,16 @@ cubes:
       - name: count
         type: count
 
+      - name: revenue
+        sql: "{CUBE}.\"REVENUE\""
+        type: sum
+
       - name: cost
         sql: "{CUBE}.\"COST\""
+        type: sum
+
+      - name: profit
+        sql: "{CUBE}.\"REVENUE\" - {CUBE}.\"COST\""
         type: sum
 
     pre_aggregations:

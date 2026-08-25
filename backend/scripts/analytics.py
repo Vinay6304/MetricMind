@@ -18,18 +18,22 @@ _connection_lock = threading.Lock()
 
 def get_connection():
     """
-    Reuse the existing Snowflake connection.
+    Return a valid Snowflake connection.
 
-    A new connection is created only when:
-    1. There is no existing connection.
-    2. The existing connection has been closed.
+    A new connection is created when:
+    1. No connection exists.
+    2. The existing connection is closed.
+    3. The existing Snowflake session has expired.
     """
 
     global _connection
 
     with _connection_lock:
 
-        # Create a connection if one doesn't exist
+        # -------------------------------------------------
+        # Create a new connection if none exists
+        # -------------------------------------------------
+
         if _connection is None:
 
             start = time.perf_counter()
@@ -49,8 +53,16 @@ def get_connection():
                 f"{time.perf_counter() - start:.2f}s"
             )
 
-        # Reconnect if the previous connection was closed
-        elif _connection.is_closed():
+        # -------------------------------------------------
+        # Reconnect if connection is closed or expired
+        # -------------------------------------------------
+
+        elif _connection.is_closed() or _connection.expired:
+
+            try:
+                _connection.close()
+            except Exception:
+                pass
 
             start = time.perf_counter()
 
@@ -70,7 +82,6 @@ def get_connection():
             )
 
         return _connection
-
 
 # =========================================================
 # OVERALL METRICS
@@ -414,7 +425,7 @@ if __name__ == "__main__":
 # =========================================================
 
 import requests
-
+import json
 
 def get_cube_dashboard_data():
 
@@ -422,16 +433,16 @@ def get_cube_dashboard_data():
 
     query = {
         "measures": [
-            "Orders.total_orders",
-            "Orders.total_revenue",
-            "Orders.total_cost",
-            "Orders.total_profit"
+            "sales.count",
+            "sales.revenue",
+            "sales.cost",
+            "sales.profit"
         ]
     }
 
     response = requests.get(
         cube_url,
-        params={"query": str(query)}
+        params={"query": json.dumps(query)}
     )
 
     response.raise_for_status()
