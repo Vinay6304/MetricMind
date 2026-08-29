@@ -87,7 +87,7 @@ def get_connection():
 # OVERALL METRICS
 # =========================================================
 
-def get_overall_metrics(cursor):
+def get_overall_metrics(cursor, region=None):
 
     query = """
         SELECT
@@ -99,10 +99,18 @@ def get_overall_metrics(cursor):
                 (SUM(REVENUE - COST) / NULLIF(SUM(REVENUE), 0)) * 100,
                 2
             ) AS PROFIT_MARGIN_PERCENT
-        FROM SALES;
+        FROM SALES
     """
 
-    cursor.execute(query)
+    params = ()
+
+    if region:
+        query += """
+            WHERE REGION = %s
+        """
+        params = (region,)
+
+    cursor.execute(query, params)
 
     return cursor.fetchone()
 
@@ -143,7 +151,7 @@ def get_region_metrics(cursor, region=None):
 # PRODUCT METRICS
 # =========================================================
 
-def get_product_metrics(cursor):
+def get_product_metrics(cursor, region=None):
 
     query = """
         SELECT
@@ -153,20 +161,30 @@ def get_product_metrics(cursor):
             SUM(COST) AS TOTAL_COST,
             SUM(REVENUE - COST) AS TOTAL_PROFIT
         FROM SALES
+    """
+
+    params = ()
+
+    if region:
+        query += """
+            WHERE REGION = %s
+        """
+        params = (region,)
+
+    query += """
         GROUP BY PRODUCT
         ORDER BY TOTAL_REVENUE DESC;
     """
 
-    cursor.execute(query)
+    cursor.execute(query, params)
 
     return cursor.fetchall()
-
 
 # =========================================================
 # MONTHLY METRICS
 # =========================================================
 
-def get_monthly_metrics(cursor):
+def get_monthly_metrics(cursor, region=None):
 
     query = """
         SELECT
@@ -176,11 +194,22 @@ def get_monthly_metrics(cursor):
             SUM(COST) AS TOTAL_COST,
             SUM(REVENUE - COST) AS TOTAL_PROFIT
         FROM SALES
+    """
+
+    params = ()
+
+    if region:
+        query += """
+            WHERE REGION = %s
+        """
+        params = (region,)
+
+    query += """
         GROUP BY DATE_TRUNC('MONTH', ORDER_DATE)
         ORDER BY MONTH;
     """
 
-    cursor.execute(query)
+    cursor.execute(query, params)
 
     return cursor.fetchall()
 
@@ -189,7 +218,7 @@ def get_monthly_metrics(cursor):
 # COUNTRY METRICS
 # =========================================================
 
-def get_country_metrics(cursor):
+def get_country_metrics(cursor, region=None):
 
     query = """
         SELECT
@@ -199,11 +228,22 @@ def get_country_metrics(cursor):
             SUM(COST) AS TOTAL_COST,
             SUM(REVENUE - COST) AS TOTAL_PROFIT
         FROM SALES
+    """
+
+    params = ()
+
+    if region:
+        query += """
+            WHERE REGION = %s
+        """
+        params = (region,)
+
+    query += """
         GROUP BY COUNTRY
         ORDER BY TOTAL_REVENUE DESC;
     """
 
-    cursor.execute(query)
+    cursor.execute(query, params)
 
     return cursor.fetchall()
 
@@ -230,7 +270,7 @@ def get_dashboard_data(region=None):
 
         start = time.perf_counter()
 
-        overall = get_overall_metrics(cursor)
+        overall = get_overall_metrics(cursor, region)
 
         print(
             f"Overall: "
@@ -244,7 +284,7 @@ def get_dashboard_data(region=None):
 
         start = time.perf_counter()
 
-        regions = get_region_metrics(cursor,region)
+        regions = get_region_metrics(cursor, region)
 
         print(
             f"Regions: "
@@ -258,7 +298,7 @@ def get_dashboard_data(region=None):
 
         start = time.perf_counter()
 
-        products = get_product_metrics(cursor)
+        products = get_product_metrics(cursor, region)
 
         print(
             f"Products: "
@@ -272,7 +312,7 @@ def get_dashboard_data(region=None):
 
         start = time.perf_counter()
 
-        months = get_monthly_metrics(cursor)
+        months = get_monthly_metrics(cursor, region)
 
         print(
             f"Months: "
@@ -286,7 +326,7 @@ def get_dashboard_data(region=None):
 
         start = time.perf_counter()
 
-        countries = get_country_metrics(cursor)
+        countries = get_country_metrics(cursor, region)
 
         print(
             f"Countries: "
@@ -323,102 +363,6 @@ def get_dashboard_data(region=None):
         if cursor is not None:
             cursor.close()
 
-
-# =========================================================
-# TESTING
-# =========================================================
-
-if __name__ == "__main__":
-
-    dashboard_data = get_dashboard_data()
-
-
-    # -----------------------------------------------------
-    # OVERALL METRICS
-    # -----------------------------------------------------
-
-    metrics = dashboard_data["overall"]
-
-    print("\nOverall Metrics")
-    print("----------------")
-
-    print(f"Total Orders: {metrics[0]}")
-    print(f"Total Revenue: {metrics[1]}")
-    print(f"Total Cost: {metrics[2]}")
-    print(f"Total Profit: {metrics[3]}")
-    print(f"Profit Margin: {metrics[4]}%")
-
-
-    # -----------------------------------------------------
-    # REGIONAL METRICS
-    # -----------------------------------------------------
-
-    print("\nRegional Metrics")
-    print("----------------")
-
-    for region in dashboard_data["regions"]:
-
-        print(
-            f"{region[0]} | "
-            f"Orders: {region[1]} | "
-            f"Revenue: {region[2]} | "
-            f"Cost: {region[3]} | "
-            f"Profit: {region[4]}"
-        )
-
-
-    # -----------------------------------------------------
-    # PRODUCT METRICS
-    # -----------------------------------------------------
-
-    print("\nProduct Metrics")
-    print("----------------")
-
-    for product in dashboard_data["products"]:
-
-        print(
-            f"{product[0]} | "
-            f"Orders: {product[1]} | "
-            f"Revenue: {product[2]} | "
-            f"Cost: {product[3]} | "
-            f"Profit: {product[4]}"
-        )
-
-
-    # -----------------------------------------------------
-    # MONTHLY METRICS
-    # -----------------------------------------------------
-
-    print("\nMonthly Metrics")
-    print("----------------")
-
-    for month in dashboard_data["months"]:
-
-        print(
-            f"{month[0]} | "
-            f"Orders: {month[1]} | "
-            f"Revenue: {month[2]} | "
-            f"Cost: {month[3]} | "
-            f"Profit: {month[4]}"
-        )
-
-
-    # -----------------------------------------------------
-    # COUNTRY METRICS
-    # -----------------------------------------------------
-
-    print("\nCountry Metrics")
-    print("----------------")
-
-    for country in dashboard_data["countries"]:
-
-        print(
-            f"{country[0]} | "
-            f"Orders: {country[1]} | "
-            f"Revenue: {country[2]} | "
-            f"Cost: {country[3]} | "
-            f"Profit: {country[4]}"
-        )
 
  # =========================================================
 # CUBE API

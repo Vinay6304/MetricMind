@@ -1990,8 +1990,6 @@ const response = await fetch(apiUrl);
             =========================*/
 
             const overall = data.overall;
-            console.log("Overall DATA:", overall);
-            console.log("FULL DASHBOARD DATA:", data);
 
             document.getElementById("total-orders").textContent = formatNumber(overall[0]);
             document.getElementById("total-revenue").textContent = formatMoney(overall[1]);
@@ -2320,7 +2318,11 @@ const response = await fetch(apiUrl);
 
     const regionFilter = document.getElementById("region-filter");
     if (regionFilter) {
-        regionFilter.addEventListener("change", loadDashboard);
+        regionFilter.addEventListener("change",
+            function() {
+                loadDashboard();
+                loadAIInsights();
+            });
     }
 
     const navLinks = document.querySelectorAll(".sidebar a");
@@ -2737,6 +2739,12 @@ function createAIAnalyst() {
               SEND QUESTION TO BACKEND
             -------------------------------------------*/
 
+            const regionFilter =
+                document.getElementById("region-filter");
+
+            const selectedRegion =
+                regionFilter ? regionFilter.value : "";
+
             const response = await fetch(
                 "http://127.0.0.1:5000/api/ai",
                 {
@@ -2747,7 +2755,8 @@ function createAIAnalyst() {
                     },
 
                     body: JSON.stringify({
-                        prompt: prompt
+                        prompt: prompt,
+                        region: selectedRegion
                     })
                 }
             );
@@ -2879,10 +2888,17 @@ async function loadAIInsights() {
 
     try {
 
-        const response = await fetch(
-            "http://127.0.0.1:5000/api/ai/summary"
-        );
+      const regionFilter =
+    document.getElementById("region-filter");
 
+const selectedRegion =
+    regionFilter ? regionFilter.value : "";
+
+const apiUrl = selectedRegion
+    ? `http://127.0.0.1:5000/api/ai/summary?region=${encodeURIComponent(selectedRegion)}`
+    : "http://127.0.0.1:5000/api/ai/summary";
+
+const response = await fetch(apiUrl);
         const data = await response.json();
 
         if (!response.ok || !data.success) {

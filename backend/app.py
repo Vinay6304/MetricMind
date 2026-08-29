@@ -92,6 +92,10 @@ def ai_query():
         ""
     ).strip()
 
+    region = body.get(
+        "region"
+    )
+
 
     if not prompt:
 
@@ -105,9 +109,12 @@ def ai_query():
 
         # -------------------------------------------------
         # Get LIVE dashboard data
+        # using the selected region
         # -------------------------------------------------
 
-        dashboard_data = get_dashboard_data()
+        dashboard_data = get_dashboard_data(
+            region=region
+        )
 
 
         # -------------------------------------------------
@@ -147,10 +154,19 @@ def ai_summary():
     try:
 
         # -------------------------------------------------
-        # Get LIVE dashboard data
+        # Get selected region
         # -------------------------------------------------
 
-        dashboard_data = get_dashboard_data()
+        region = request.args.get("region")
+
+        # -------------------------------------------------
+        # Get LIVE dashboard data
+        # using the selected region
+        # -------------------------------------------------
+
+        dashboard_data = get_dashboard_data(
+            region=region
+        )
 
 
         # -------------------------------------------------
