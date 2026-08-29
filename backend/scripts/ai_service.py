@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import datetime
 from decimal import Decimal
 
 from dotenv import load_dotenv
@@ -66,6 +67,24 @@ def format_money(value):
     """Format currency consistently with the dashboard."""
 
     return f"₹{format_number(value)}"
+
+def format_date(value):
+    """Format dashboard dates for readable AI responses."""
+
+    if value is None:
+        return "Unknown date"
+
+    if isinstance(value, datetime):
+        return value.strftime("%b %d, %Y")
+
+    try:
+        parsed = datetime.fromisoformat(
+            str(value)
+        )
+        return parsed.strftime("%b %d, %Y")
+
+    except (TypeError, ValueError):
+        return str(value)
 
 
 # =========================================================
@@ -526,6 +545,18 @@ def find_named_entities(
 
     return matches
 
+def is_comparison_request(prompt):
+    """Check whether the user is explicitly asking for a comparison."""
+
+    text = prompt.lower()
+
+    return any(word in text for word in [
+        "compare",
+        "comparison",
+        "versus",
+        "vs",
+        "difference between"
+    ])
 
 # =========================================================
 # COMPARISON INSIGHT
@@ -670,14 +701,16 @@ def monthly_insight(
         high_text = format_money(high_value)
         low_text = format_money(low_value)
 
+    highest_date = format_date(highest[0])
+    lowest_date = format_date(lowest[0])
+
     return (
         "MetricMind Insight:\n"
         f"The strongest {label} period was "
-        f"{highest[0]}, with {high_text}. "
+        f"{highest_date}, with {high_text}. "
         f"The weakest {label} period was "
-        f"{lowest[0]}, with {low_text}."
+        f"{lowest_date}, with {low_text}."
     )
-
 
 # =========================================================
 # OPENAI DATA CONTEXT
@@ -864,8 +897,6 @@ def mock_response(
     dashboard_data
 ):
 
-    text = prompt.lower()
-
     metric = detect_metric(prompt)
 
     category = detect_category(prompt)
@@ -873,12 +904,40 @@ def mock_response(
     direction = detect_direction(prompt)
 
     # -----------------------------------------------------
+    # DETECT CATEGORY FROM NAMED DASHBOARD ENTITIES
+    # -----------------------------------------------------
+
+    if category is None:
+
+        for possible_category in [
+            "countries",
+            "products",
+            "regions",
+            "months"
+        ]:
+
+            rows = get_rows(
+                dashboard_data,
+                possible_category
+            )
+
+            matches = find_named_entities(
+                prompt,
+                rows
+            )
+
+            if matches:
+
+                category = possible_category
+                break
+
+    # -----------------------------------------------------
     # OVERALL
     # -----------------------------------------------------
 
     if (
         category is None
-        and any(word in text for word in [
+        and any(word in prompt for word in [
             "overall",
             "total",
             "business performance",
@@ -908,6 +967,31 @@ def mock_response(
 
             return comparison
 
+    # -------------------------------------------------
+    # EXPLICIT COMPARISON BUT ENTITY DATA IS MISSING
+    # -------------------------------------------------
+
+    if is_comparison_request(prompt):
+
+        rows = get_rows(
+            dashboard_data,
+            category
+        )
+
+        matches = find_named_entities(
+            prompt,
+            rows
+        )
+
+        if len(matches) < 2:
+
+            return (
+                "MetricMind Insight:\n"
+                "I cannot complete that comparison because "
+                "one or more requested items are not available "
+                "in the currently selected data."
+            )
+
     # -----------------------------------------------------
     # MONTHLY
     # -----------------------------------------------------
@@ -923,7 +1007,7 @@ def mock_response(
     # RANKING REQUEST
     # -----------------------------------------------------
 
-    if category and any(word in text for word in [
+    if category and any(word in prompt for word in [
         "rank",
         "ranking",
         "list",
@@ -954,7 +1038,7 @@ def mock_response(
     # GENERAL SALES QUESTION
     # -----------------------------------------------------
 
-    if any(word in text for word in [
+    if any(word in prompt for word in [
         "sales",
         "revenue",
         "profit",
