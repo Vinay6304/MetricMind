@@ -550,12 +550,20 @@ def is_comparison_request(prompt):
 
     text = prompt.lower()
 
-    return any(word in text for word in [
+    return any(phrase in text for phrase in [
         "compare",
         "comparison",
         "versus",
         "vs",
-        "difference between"
+        "difference between",
+        "more than",
+        "less than",
+        "higher than",
+        "lower than",
+        "better than",
+        "worse than",
+        "more profitable than",
+        "less profitable than"
     ])
 
 # =========================================================
@@ -710,6 +718,93 @@ def monthly_insight(
         f"{highest_date}, with {high_text}. "
         f"The weakest {label} period was "
         f"{lowest_date}, with {low_text}."
+    )
+
+# =========================================================
+# TREND INSIGHT
+# =========================================================
+
+def trend_insight(
+    dashboard_data,
+    metric
+):
+    """
+    Analyze whether a metric is increasing,
+    decreasing, or unchanged over time.
+    """
+
+    months = get_rows(
+        dashboard_data,
+        "months"
+    )
+
+    if not months:
+
+        return (
+            "MetricMind Insight:\n"
+            "No monthly sales data is available."
+        )
+
+    if len(months) < 2:
+
+        return (
+            "MetricMind Insight:\n"
+            "Not enough monthly data is available "
+            "to determine a trend."
+        )
+
+    first_month = months[0]
+    last_month = months[-1]
+
+    first_value = get_metric_value(
+        first_month,
+        metric
+    )
+
+    last_value = get_metric_value(
+        last_month,
+        metric
+    )
+
+    difference = last_value - first_value
+
+    label = metric_label(metric)
+
+    if difference > 0:
+
+        direction = "increasing"
+
+    elif difference < 0:
+
+        direction = "decreasing"
+
+    else:
+
+        direction = "unchanged"
+
+    if metric == "orders":
+
+        first_text = format_number(first_value)
+        last_text = format_number(last_value)
+        difference_text = format_number(
+            abs(difference)
+        )
+
+    else:
+
+        first_text = format_money(first_value)
+        last_text = format_money(last_value)
+        difference_text = format_money(
+            abs(difference)
+        )
+
+    return (
+        "MetricMind Insight:\n"
+        f"{label.title()} is {direction} over time. "
+        f"It changed from {first_text} in "
+        f"{first_month[0]} to {last_text} in "
+        f"{last_month[0]}. "
+        f"The overall change is {difference_text}."
     )
 
 # =========================================================
@@ -903,6 +998,8 @@ def mock_response(
 
     direction = detect_direction(prompt)
 
+    text = prompt.lower()
+
     # -----------------------------------------------------
     # DETECT CATEGORY FROM NAMED DASHBOARD ENTITIES
     # -----------------------------------------------------
@@ -932,12 +1029,78 @@ def mock_response(
                 break
 
     # -----------------------------------------------------
+    # TREND ANALYSIS
+    # -----------------------------------------------------
+
+    if any(word in text for word in [
+        "increasing",
+        "decreasing",
+        "improving",
+        "declining",
+        "trend",
+        "over time"
+    ]):
+
+        return trend_insight(
+            dashboard_data,
+            metric
+        )
+
+    # -----------------------------------------------------
+    # COMPARISON
+    # -----------------------------------------------------
+
+    comparison_phrases = [
+        "compare",
+        "comparison",
+        "versus",
+        "vs",
+        "difference between",
+        "more than",
+        "less than",
+        "higher than",
+        "lower than",
+        "better than",
+        "worse than",
+        "more profitable than",
+        "less profitable than"
+    ]
+
+    is_comparison = (
+        is_comparison_request(prompt)
+        or any(
+            phrase in text
+            for phrase in comparison_phrases
+        )
+    )
+
+    if is_comparison:
+
+        if category:
+
+            comparison = comparison_insight(
+                dashboard_data,
+                category,
+                metric,
+                prompt
+            )
+
+            if comparison:
+
+                return comparison
+
+        return (
+            "MetricMind Insight:\n"
+            "Unable to complete the requested comparison."
+        )
+
+    # -----------------------------------------------------
     # OVERALL
     # -----------------------------------------------------
 
     if (
         category is None
-        and any(word in prompt for word in [
+        and any(word in text for word in [
             "overall",
             "total",
             "business performance",
@@ -949,48 +1112,6 @@ def mock_response(
         return overall_sales_insight(
             dashboard_data
         )
-
-    # -----------------------------------------------------
-    # COMPARISON
-    # -----------------------------------------------------
-
-    if category:
-
-        comparison = comparison_insight(
-            dashboard_data,
-            category,
-            metric,
-            prompt
-        )
-
-        if comparison:
-
-            return comparison
-
-    # -------------------------------------------------
-    # EXPLICIT COMPARISON BUT ENTITY DATA IS MISSING
-    # -------------------------------------------------
-
-    if is_comparison_request(prompt):
-
-        rows = get_rows(
-            dashboard_data,
-            category
-        )
-
-        matches = find_named_entities(
-            prompt,
-            rows
-        )
-
-        if len(matches) < 2:
-
-            return (
-                "MetricMind Insight:\n"
-                "I cannot complete that comparison because "
-                "one or more requested items are not available "
-                "in the currently selected data."
-            )
 
     # -----------------------------------------------------
     # MONTHLY
@@ -1007,7 +1128,7 @@ def mock_response(
     # RANKING REQUEST
     # -----------------------------------------------------
 
-    if category and any(word in prompt for word in [
+    if category and any(word in text for word in [
         "rank",
         "ranking",
         "list",
@@ -1038,7 +1159,7 @@ def mock_response(
     # GENERAL SALES QUESTION
     # -----------------------------------------------------
 
-    if any(word in prompt for word in [
+    if any(word in text for word in [
         "sales",
         "revenue",
         "profit",
@@ -1049,21 +1170,21 @@ def mock_response(
         return overall_sales_insight(
             dashboard_data
         )
-
-    #-----------------------------------------------------
+    
+# -----------------------------------------------------
     # DEFAULT
-    #-----------------------------------------------------
+    # -----------------------------------------------------
 
     return (
         "MetricMind Insight:\n"
-        "I can analyze sales data by country. "
-        "product, region and month, including revenue. "
-        "cost, profit and orders. "
+        "I can analyze sales data by country, "
+        "product, region and month, including "
+        "revenue, cost, profit and orders."
     )
 
-    # =========================================================
-    # Main AI FUNCTION
-    # =========================================================
+# =========================================================
+# Main AI FUNCTION
+# =========================================================
 
 def ask_ai(
     prompt,
